@@ -182,4 +182,7 @@ func (c *appGwConfigBuilder) addTags() {
 	}
 	// Identify the App Gateway as being exclusively managed by a Kubernetes Ingress.
 	c.appGw.Tags[managedByK8sIngress] = to.StringPtr(fmt.Sprintf("%s/%s/%s", version.Version, version.GitCommit, version.BuildDate))
+	for _, clusterID := range c.k8sContext.GetClusterID(){
+		c.appGw.Tags[aksClusterID] = to.StringPtr(ConvertToClusterResourceGroup(clusterID))
+	}
 }

@@ -55,6 +55,7 @@ func NewContext(kubeClient kubernetes.Interface, crdClient versioned.Interface, 
 		Pods:      informerFactory.Core().V1().Pods().Informer(),
 		Secret:    informerFactory.Core().V1().Secrets().Informer(),
 		Service:   informerFactory.Core().V1().Services().Informer(),
+		Nodes:     informerFactory.Core().V1().Nodes().Informer(),
 
 		AzureIngressProhibitedTarget: crdInformerFactory.Azureingressprohibitedtargets().V1().AzureIngressProhibitedTargets().Informer(),
 
@@ -71,6 +72,7 @@ func NewContext(kubeClient kubernetes.Interface, crdClient versioned.Interface, 
 		AzureIngressProhibitedTarget: informerCollection.AzureIngressProhibitedTarget.GetStore(),
 		IstioGateway:                 informerCollection.IstioGateway.GetStore(),
 		IstioVirtualService:          informerCollection.IstioVirtualService.GetStore(),
+		Nodes:                        informerCollection.Nodes.GetStore(),
 	}
 
 	context := &Context{
@@ -127,6 +129,7 @@ func (c *Context) Run(stopChannel chan struct{}, omitCRDs bool, envVariables env
 	}
 
 	sharedInformers := []cache.SharedInformer{
+		c.informers.Nodes,
 		c.informers.Endpoints,
 		c.informers.Pods,
 		c.informers.Service,
@@ -356,6 +359,25 @@ func (c *Context) GetGateways() []*v1alpha3.Gateway {
 		}
 	}
 	return annotatedGateways
+}
+
+// GetClusterID returns all Istio Gateways that are annotated.
+func (c *Context) GetClusterID() []string {
+	var clusterIDs []string
+	for _, node := range c.getNodes() {
+		clusterIDs = append(clusterIDs, strings.TrimPrefix(node.Spec.ProviderID, "azure://"))
+	}
+
+	return clusterIDs
+}
+
+func (c *Context) getNodes() []*v1.Node {
+	var nodes []*v1.Node
+	for _, nodeInterface := range c.Caches.Nodes.List() {
+		node := nodeInterface.(*v1.Node)
+		nodes = append(nodes, node)
+	}
+	return nodes
 }
 
 // UpdateIngressStatus adds IP address in Ingress Status

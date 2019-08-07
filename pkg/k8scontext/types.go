@@ -22,6 +22,7 @@ type InformerCollection struct {
 	AzureIngressProhibitedTarget cache.SharedInformer
 	IstioGateway                 cache.SharedIndexInformer
 	IstioVirtualService          cache.SharedIndexInformer
+	Nodes                        cache.SharedIndexInformer
 }
 
 // CacheCollection : all the listers from the informers.
@@ -36,6 +37,7 @@ type CacheCollection struct {
 	AzureIngressProhibitedTarget cache.Store
 	IstioGateway                 cache.Store
 	IstioVirtualService          cache.Store
+	Nodes                        cache.Store
 }
 
 // Context : cache and listener for k8s resources.

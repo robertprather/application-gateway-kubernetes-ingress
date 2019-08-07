@@ -202,14 +202,14 @@ func (c AppGwIngressController) updateIPAddressMap(appGw *n.ApplicationGateway) 
 
 		if ipConf.PrivateIPAddress != nil {
 			c.ipAddressMap[*ipConf.ID] = k8scontext.IPAddress(*ipConf.PrivateIPAddress)
-		} else if ipAddress := c.getPublicIPAddress(ParseResourceID(*ipConf.PublicIPAddress.ID)); ipAddress != nil {
+		} else if ipAddress := c.getPublicIPAddress(appgw.ParseResourceID(*ipConf.PublicIPAddress.ID)); ipAddress != nil {
 			c.ipAddressMap[*ipConf.ID] = *ipAddress
 		}
 	}
 }
 
 // getPublicIPAddress gets the ip address associated to public ip on Azure
-func (c AppGwIngressController) getPublicIPAddress(subscriptionID SubscriptionID, resourceGroup ResourceGroup, publicIPName ResourceName) *k8scontext.IPAddress {
+func (c AppGwIngressController) getPublicIPAddress(subscriptionID appgw.SubscriptionID, resourceGroup appgw.ResourceGroup, publicIPName appgw.ResourceName) *k8scontext.IPAddress {
 	ctx := context.Background()
 	// initialize public ip client using auth used with appgw client
 	publicIPClient := n.NewPublicIPAddressesClient(string(subscriptionID))

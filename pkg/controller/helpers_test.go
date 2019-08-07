@@ -103,17 +103,4 @@ var _ = Describe("test helpers", func() {
 			Expect(isSlice(make(map[string]interface{}))).To(BeFalse())
 		})
 	})
-
-	Context("ensure ParseResourceID works as expected", func() {
-		It("should parse appgw resourceId correctly", func() {
-			subID := SubscriptionID("xxxx")
-			resGp := ResourceGroup("yyyy")
-			resName := ResourceName("zzzz")
-			resourceID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/publicIPAddresses/%s", subID, resGp, resName)
-			outSubID, outResGp, outResName := ParseResourceID(resourceID)
-			Expect(outSubID).To(Equal(subID))
-			Expect(resGp).To(Equal(outResGp))
-			Expect(resName).To(Equal(outResName))
-		})
-	})
 })
