@@ -57,11 +57,22 @@ const (
 	ApplicationGatewayIngressClass = "azure/application-gateway"
 )
 
-const (
-	BackendProtocolHTTP = "http"
+// ProtocolEnum is the type for protocol
+type ProtocolEnum int
 
-	BackendProtocolHTTPS = "https"
+const (
+	// HTTP is enum for http protocol
+	HTTP ProtocolEnum = iota + 1
+
+	// HTTPS is enum for https protocol
+	HTTPS
 )
+
+// ProtocolEnumLookup is a reverse map of the EventType enums; used for logging purposes
+var ProtocolEnumLookup = map[ProtocolEnum]string{
+	1: "http",
+	2: "https",
+}
 
 // IngressClass ingress class
 func IngressClass(ing *v1beta1.Ingress) (string, error) {
@@ -119,17 +130,20 @@ func UsePrivateIP(ing *v1beta1.Ingress) (bool, error) {
 }
 
 // BackendProtocol provides value for protocol to be used with the backend
-func BackendProtocol(ing *v1beta1.Ingress) (string, error) {
+func BackendProtocol(ing *v1beta1.Ingress) (ProtocolEnum, error) {
 	protocol, err := parseString(ing, BackendProtocolKey)
 	if err != nil {
-		return BackendProtocolHTTP, err
-	}
-	if strings.ToLower(protocol) != BackendProtocolHTTP &&
-		strings.ToLower(protocol) != BackendProtocolHTTPS {
-		return BackendProtocolHTTP, errors.NewInvalidAnnotationContent(BackendProtocolKey, protocol)
+		return HTTP, err
 	}
 
-	return strings.ToLower(protocol), nil
+	protocolLowerCase := strings.ToLower(protocol)
+	for protocolEnum, mappedProtocol := range ProtocolEnumLookup {
+		if protocolLowerCase == mappedProtocol {
+			return protocolEnum, nil
+		}
+	}
+
+	return HTTP, errors.NewInvalidAnnotationContent(BackendProtocolKey, protocol)
 }
 
 func parseBool(ing *v1beta1.Ingress, name string) (bool, error) {

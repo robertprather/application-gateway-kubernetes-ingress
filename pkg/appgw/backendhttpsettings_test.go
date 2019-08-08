@@ -32,11 +32,11 @@ var _ = Describe("Test the creation of Backend http settings from Ingress defini
 	Context("test backend protocol annotation configures protocol on httpsettings", func() {
 
 		// checkBackendProtocolAnnotation tests different annotation values and expected output in http settings
-		checkBackendProtocolAnnotation := func(annotationValue string, expectedProtocolValue n.ApplicationGatewayProtocol) {
+		checkBackendProtocolAnnotation := func(annotationValue string, protocolEnum annotations.ProtocolEnum, expectedProtocolValue n.ApplicationGatewayProtocol) {
 			// Setup
 			ingress.Annotations[annotations.BackendProtocolKey] = annotationValue
 			_ = configBuilder.k8sContext.Caches.Ingress.Update(ingress)
-			Expect(annotations.BackendProtocol(ingress)).To(Equal(annotationValue))
+			Expect(annotations.BackendProtocol(ingress)).To(Equal(protocolEnum))
 
 			cbCtx := &ConfigBuilderContext{
 				IngressList: []*v1beta1.Ingress{ingress},
@@ -57,11 +57,11 @@ var _ = Describe("Test the creation of Backend http settings from Ingress defini
 		}
 
 		It("should have all but default backend http settings with https", func() {
-			checkBackendProtocolAnnotation(annotations.BackendProtocolHTTPS, n.HTTPS)
+			checkBackendProtocolAnnotation("HttPS", annotations.HTTPS, n.HTTPS)
 		})
 
 		It("should have all backend http settings with http", func() {
-			checkBackendProtocolAnnotation(annotations.BackendProtocolHTTP, n.HTTP)
+			checkBackendProtocolAnnotation("HttP", annotations.HTTP, n.HTTP)
 		})
 	})
 })
